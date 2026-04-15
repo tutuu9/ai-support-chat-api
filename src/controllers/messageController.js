@@ -1,0 +1,69 @@
+const Chat = require('../models/Chat');
+const Message = require('../models/Message')
+
+const sendMessage = async (req, res) =>{
+    try{
+        const { chatId, text } = req.body || {}
+
+        if(!chatId){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Chat ID is required'
+            });
+        };
+
+        if(!text){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Text is required'
+            });
+        };
+        if(!text.trim()){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Text is required'
+            });
+        };
+
+        const chat = await Chat.findById(chatId);
+
+        if(!chat){
+            return res.status(404).json({
+                status: 'error',
+                message: 'Chat not found'
+            });
+        };
+
+        if(chat.user.toString() !== req.user._id.toString() && req.user.role !== 'admin'){
+            return res.status(403).json({
+                status: 'error',
+                message: "You don't have permission"
+            });
+        };
+
+        const senderType = req.user.role === 'admin' ? 'admin' : 'user';
+
+        const message = await Message.create({
+            chat: chatId,
+            sender: req.user._id,
+            text: text,
+            senderType: senderType
+        });
+
+        return res.status(201).json({
+            status: 'success',
+            message: 'Message sent successfully',
+            message
+        });
+    } catch (error){
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+       });
+    };
+};
+
+module.exports={
+    sendMessage,
+};

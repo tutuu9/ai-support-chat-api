@@ -34,7 +34,7 @@ const createChat = async (req,res) =>{
             status: 'error',
             message: 'Server error'
        });
-    }
+    };
 };
 
 module.exports={
