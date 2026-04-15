@@ -92,10 +92,20 @@ const getMessagesByChat = async (req, res) =>{
 
         const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
 
-        return res.status(200).json({
-            status: 'success',
-            messages
+        const { generateAiReply } = require('../services/aiService');
+
+        const aiResponse = await generateAiReply({
+            messages,
+            systemPrompt: 'You are a helpful support assistant'
         });
+
+        const aiMessage = await Message.create({
+            chat: chatId,
+            sender: null,
+            senderType: 'ai',
+            text: aiResponse.reply
+        });
+
     } catch (error){
         console.log(error);
         return res.status(500).json({
