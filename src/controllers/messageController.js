@@ -64,6 +64,46 @@ const sendMessage = async (req, res) =>{
     };
 };
 
+const getMessagesByChat = async (req, res) =>{
+    try{
+        const chatId = req.params.chatId;
+        if(!chatId){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Chat ID is required'
+            })
+        };
+
+        const chat = await Chat.findById(chatId);
+
+        if(!chat){
+            return res.status(404).json({
+                status: 'error',
+                message: 'Chat not found'
+            });
+        };
+        
+        if(chat.user.toString() !== req.user._id.toString() && req.user.role !== 'admin'){
+            return res.status(403).json({
+                status: 'error',
+                message: "You don't have permission"
+            });
+        };
+
+        const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
+
+        return res.status(200).json({
+            status: 'success',
+            messages
+        });
+    } catch (error){
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+        })
+    };
+};
 module.exports={
-    sendMessage,
+    sendMessage, getMessagesByChat
 };
