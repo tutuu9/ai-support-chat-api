@@ -45,6 +45,8 @@ const sendMessage = async (req, res) =>{
 
         const senderType = req.user.role === 'admin' ? 'admin' : 'user';
 
+        const settings = await AISettings.findOne();
+        const systemPrompt = settings?.systemPrompt || 'You are a helpful support assistant';
         const message = await Message.create({
             chat: chatId,
             sender: req.user._id,
@@ -56,7 +58,7 @@ const sendMessage = async (req, res) =>{
             const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
             const aiResponse = await generateAiReply({
                 messages,
-                systemPrompt: 'You are a helpful support assistant'
+                systemPrompt
             });
             const aiMessage = await Message.create({
                 chat: chatId,
