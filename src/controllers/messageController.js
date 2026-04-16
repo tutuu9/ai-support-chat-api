@@ -1,5 +1,6 @@
 const Chat = require('../models/Chat');
 const Message = require('../models/Message')
+const { generateAiReply } = require('../services/aiService');
 
 const sendMessage = async (req, res) =>{
     try{
@@ -50,10 +51,23 @@ const sendMessage = async (req, res) =>{
             senderType: senderType
         });
 
+        const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
+    
+        const aiResponse = await generateAiReply({
+            messages,
+            systemPrompt: 'You are a helpful support assistant'
+        });
+        const aiMessage = await Message.create({
+            chat: chatId,
+            sender: null,
+            senderType: 'ai',
+            text: aiResponse.reply
+        });
         return res.status(201).json({
             status: 'success',
             message: 'Message sent successfully',
-            message
+            userMessage: message,
+            aiMessage
         });
     } catch (error){
         console.log(error);
@@ -91,19 +105,9 @@ const getMessagesByChat = async (req, res) =>{
         };
 
         const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
-
-        const { generateAiReply } = require('../services/aiService');
-
-        const aiResponse = await generateAiReply({
-            messages,
-            systemPrompt: 'You are a helpful support assistant'
-        });
-
-        const aiMessage = await Message.create({
-            chat: chatId,
-            sender: null,
-            senderType: 'ai',
-            text: aiResponse.reply
+        return res.status(200).json({
+            status: 'success',
+            messages
         });
 
     } catch (error){
