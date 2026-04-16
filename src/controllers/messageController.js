@@ -94,7 +94,12 @@ const getMessagesByChat = async (req, res) =>{
                 message: 'Chat ID is required'
             })
         };
-
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                status: 'error',
+                message: "You don't have permission"
+            });  
+        };
         const chat = await Chat.findById(chatId);
 
         if(!chat){
