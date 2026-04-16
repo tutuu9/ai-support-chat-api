@@ -47,6 +47,7 @@ const sendMessage = async (req, res) =>{
 
         const settings = await AISettings.findOne();
         const systemPrompt = settings?.systemPrompt || 'You are a helpful support assistant';
+        
         const message = await Message.create({
             chat: chatId,
             sender: req.user._id,
