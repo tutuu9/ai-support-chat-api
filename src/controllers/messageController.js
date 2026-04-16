@@ -1,6 +1,7 @@
 const Chat = require('../models/Chat');
 const Message = require('../models/Message')
 const { generateAiReply } = require('../services/aiService');
+const AISettings = require('../models/AISettings');
 
 const sendMessage = async (req, res) =>{
     try{

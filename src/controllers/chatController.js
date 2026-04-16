@@ -1,4 +1,5 @@
 const Chat = require('../models/Chat');
+const AISettings = require('../models/AISettings');
 
 const createChat = async (req,res) =>{
     try{
