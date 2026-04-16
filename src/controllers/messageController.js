@@ -51,23 +51,30 @@ const sendMessage = async (req, res) =>{
             senderType: senderType
         });
 
-        const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
-    
-        const aiResponse = await generateAiReply({
-            messages,
-            systemPrompt: 'You are a helpful support assistant'
-        });
-        const aiMessage = await Message.create({
-            chat: chatId,
-            sender: null,
-            senderType: 'ai',
-            text: aiResponse.reply
-        });
+        if(chat.aiEnabled){
+            const messages = await Message.find({ chat: chatId }).sort({ createdAt: 1 });
+            const aiResponse = await generateAiReply({
+                messages,
+                systemPrompt: 'You are a helpful support assistant'
+            });
+            const aiMessage = await Message.create({
+                chat: chatId,
+                sender: null,
+                senderType: 'ai',
+                text: aiResponse.reply
+            });
+            return res.status(201).json({
+                status: 'success',
+                message: 'Message sent successfully',
+                userMessage: message,
+                aiMessage
+            });
+        };
+
         return res.status(201).json({
             status: 'success',
             message: 'Message sent successfully',
-            userMessage: message,
-            aiMessage
+            userMessage: message
         });
     } catch (error){
         console.log(error);
