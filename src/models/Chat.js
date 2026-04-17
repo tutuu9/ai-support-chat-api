@@ -13,10 +13,10 @@ const chatSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['open', 'closed'],
+        enum: ['open', 'closed', 'in_progress'],
         default: 'open',
     },
-    assignedAdmin: {
+    assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null,
@@ -24,6 +24,10 @@ const chatSchema = new mongoose.Schema({
     aiEnabled:{
         type: Boolean,
         default: true,  
+    },
+    needsHuman: {
+        type: Boolean,
+        default: false,
     },
 }, { timestamps: true });
 
