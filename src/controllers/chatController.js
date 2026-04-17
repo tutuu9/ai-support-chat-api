@@ -143,8 +143,69 @@ const assignedToSupport = async (req, res) =>{
        });
     };
 };
+
+const changeChatStatus = async (req, res) =>{
+    try{
+        const { chatId } = req.params || {};
+        const { status } = req.body || {};
+        if( req.user.role !== 'admin' && req.user.role !== 'support') {
+            return res.status(403).json({
+                status: 'error',
+                message: "You don't have permission"
+            });
+        };
+        if(!chatId){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Chat ID is required'
+            });
+        };
+        if(!status){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Status is required'
+            });
+        };
+        if(!['open', 'in_progress', 'closed'].includes(status)){
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid status value'
+            });
+        };
+        const chat = await Chat.findById(chatId);
+        if(!chat){
+            return res.status(404).json({
+                status: 'error',
+                message: 'Chat not found'
+            });
+        };
+        if (req.user.role === 'support') {
+            if (!chat.assignedTo || chat.assignedTo.toString() !== req.user._id.toString()) {
+                return res.status(403).json({
+                    status: 'error',
+                    message: "You don't have permission to change the status of this chat"
+                });
+            };
+        };
+        chat.status = status;
+        await chat.save();
+        return res.status(200).json({
+            status: 'success',
+            message: 'Chat status updated successfully',
+            chat
+        });
+    } catch (error){
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+       });
+    };
+};
+
 module.exports={
     createChat,
     updateAISettings,
-    assignedToSupport
+    assignedToSupport,
+    changeChatStatus
 };
