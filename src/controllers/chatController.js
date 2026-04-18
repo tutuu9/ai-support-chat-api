@@ -247,10 +247,33 @@ const requestHuman = async (req, res) =>{
        });
     };
 };
+
+const getMySupportChats = async (req, res) =>{
+    try{
+        if(req.user.role !== 'support'){
+            return res.status(403).json({
+                status: 'error',
+                message: "You don't have permission"
+            });
+        };
+        const chats = await Chat.find({ assignedTo: req.user._id }).populate('user', 'name email').sort({ createdAt: -1 });
+        return res.status(200).json({
+            status: 'success',
+            chats
+        });
+    } catch (error){
+        console.log(error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'Server error'
+       });
+    };
+};
 module.exports={
     createChat,
     updateAISettings,
     assignedToSupport,
     changeChatStatus,
-    requestHuman
+    requestHuman,
+    getMySupportChats
 };
