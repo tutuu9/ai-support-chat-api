@@ -1,5 +1,5 @@
-const app = express();
 const express = require('express');
+const app = express();
 const authRoutes = require('./routes/authRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const messageRoutes = require('./routes/messageRoutes');
