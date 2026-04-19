@@ -203,49 +203,66 @@ const changeChatStatus = async (req, res) =>{
     };
 };
 
-const requestHuman = async (req, res) =>{
-    try{
-        const { chatId } = req.params || {};
-        if(!chatId){
+const requestHuman = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+
+        if (!chatId) {
             return res.status(400).json({
                 status: 'error',
                 message: 'Chat ID is required'
             });
-        };
+        }
+
         const chat = await Chat.findById(chatId);
-        if(!chat){
+
+        if (!chat) {
             return res.status(404).json({
                 status: 'error',
                 message: 'Chat not found'
             });
-        };
+        }
+
         if (req.user.role !== 'user') {
             return res.status(403).json({
                 status: 'error',
-                message: "Only users can request human support"
+                message: 'Only users can request human support'
             });
-        };
-        if(chat.user.toString() !== req.user._id.toString()){
+        }
+
+        if (chat.user.toString() !== req.user._id.toString()) {
             return res.status(403).json({
                 status: 'error',
-                message: "You don't have permission to request human support for this chat"
+                message: "You don't have permission for this chat"
             });
-        };
+        }
+        
+        if (chat.needsHuman) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Human support already requested'
+            });
+        }
+
         chat.needsHuman = true;
         chat.aiEnabled = false;
+        chat.assignedTo = null;
+
         await chat.save();
+
         return res.status(200).json({
             status: 'success',
             message: 'Human support requested successfully',
             chat
         });
-    } catch (error){
+
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
             status: 'error',
             message: 'Server error'
-       });
-    };
+        });
+    }
 };
 
 const getMySupportChats = async (req, res) =>{
